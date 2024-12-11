@@ -24,7 +24,6 @@ const pool = new Pool({
 
 router.get("/type", async (req, res) => {
   const { type } = req.query;
-  console.log("get ingredients", type);
 
   // return all ingredients of a type
   const { rows } = await pool.query(`SELECT * FROM ingredients WHERE type=$1`, [
@@ -36,6 +35,8 @@ router.get("/type", async (req, res) => {
 });
 
 router.get("/search", async (req, res) => {
+  console.log('full request url:', req.url);
+  console.log('req query: ', req.query);
   let { term, page } = req.query;
   page = page ? page : 0;
   console.log("search ingredients", term, page);

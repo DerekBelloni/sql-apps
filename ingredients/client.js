@@ -67,11 +67,11 @@ function togglePaginationButtons(page, count) {
   }
 }
 
+
 async function init() {
   let page = 0;
 
   const fruit = await requestFromAPI("fruit");
-  console.log('fruit in clinet: ', fruit);
   populateResult("swiper-fruit", fruit, templateRow);
   const vegetable = await requestFromAPI("vegetable");
   populateResult("swiper-vegetable", vegetable, templateRow);
@@ -81,17 +81,20 @@ async function init() {
   populateResult("swiper-other", other, templateRow);
   const searchResults = await requestFromAPI();
   populateResult("search-results", searchResults, templateResult);
-  togglePaginationButtons(page, searchResults[0].total_count);
+  togglePaginationButtons(page, searchResults[0]?.total_count);
 
   const formElem = document.getElementById("search");
   formElem.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    document.getElementById("search-results").innerHTML = "";
-    const formData = new FormData(formElem);
-    page = 0;
-    const searchResults = await requestFromAPI(void 0, formData.get("term"));
-    populateResult("search-results", searchResults, templateResult);
-    togglePaginationButtons(page, searchResults[0].total_count);
+      e.preventDefault();
+      document.getElementById("search-results").innerHTML = "";
+      const formData = new FormData(formElem);
+      console.log("Form data term value:", formData.get("term")); // Check the value right after FormData creation
+      page = 0;
+      console.log("About to call requestFromAPI with term:", formData.get("term")); // Check the value being passed
+      const searchResults = await requestFromAPI(void 0, formData.get("term"));
+      console.log("Got search results:", searchResults); // See what comes back
+      populateResult("search-results", searchResults, templateResult);
+      togglePaginationButtons(page, searchResults[0].total_count);
   });
 
   document
@@ -129,4 +132,4 @@ async function init() {
   });
 }
 
-init();
+document.addEventListener('DOMContentLoaded', init);

@@ -15,6 +15,7 @@ app.get("/favicon.ico", (_, res) =>
 );
 
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use("/images", express.static("./images"));
 app.use("/completed", completed);
 app.use("/recipes", recipes);
