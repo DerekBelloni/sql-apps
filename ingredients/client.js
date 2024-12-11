@@ -32,6 +32,7 @@ const requestFromAPI = async (type, term = "", page = 0) => {
     url = new URL(
       window.location.protocol + window.location.host + "/ingredients/type"
     );
+    console.log("testing");
     url.searchParams.append("type", type);
   } else {
     url.searchParams.append("term", term);
