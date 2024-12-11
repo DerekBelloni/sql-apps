@@ -71,6 +71,7 @@ async function init() {
   let page = 0;
 
   const fruit = await requestFromAPI("fruit");
+  console.log('fruit in clinet: ', fruit);
   populateResult("swiper-fruit", fruit, templateRow);
   const vegetable = await requestFromAPI("vegetable");
   populateResult("swiper-vegetable", vegetable, templateRow);
