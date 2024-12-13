@@ -40,6 +40,11 @@ router.get("/search", async (req, res) => {
   let { term, page } = req.query;
   page = page ? page : 0;
   console.log("search ingredients", term, page);
+  const count = await pool.query(``)
+  const { rows } = await pool.query(`SELECT title, image, type FROM ingredients WHERE CONCAT(title, type) ILIKE $1 LIMIT 5`, [
+    `%${term}%`,
+  ]);
+  console.log('rows from search: ', rows);
 
   // return all columns as well as the count of all rows as total_count
   // make sure to account for pagination and only return 5 rows at a time
