@@ -35,21 +35,35 @@ router.get("/type", async (req, res) => {
 });
 
 router.get("/search", async (req, res) => {
-  console.log('full request url:', req.url);
-  console.log('req query: ', req.query);
   let { term, page } = req.query;
   page = page ? page : 0;
-  console.log("search ingredients", term, page);
-  const count = await pool.query(``)
-  const { rows } = await pool.query(`SELECT title, image, type FROM ingredients WHERE CONCAT(title, type) ILIKE $1 LIMIT 5`, [
-    `%${term}%`,
-  ]);
+  offset = page * 5;
+
+  const count = await pool.query(`SELECT COUNT(title) FROM ingredients`);
+
+  let whereClause;
+  const params = [page * 5];
+
+  if (term) {
+    whereClause = `WHERE CONCAT(title, type) ILINK $2`;
+    params.push(`%${term}%`);
+  }
+
+
+  let { rows } = await pool.query(`
+    SELECT *, COUNT(*) OVER ()::INTEGER AS total_count FROM ingredients ${whereClause} OFFSET $1 LIMIT 5`, 
+    params
+  );
+  console.log('total ingredient count: ', count.rows);
   console.log('rows from search: ', rows);
 
   // return all columns as well as the count of all rows as total_count
   // make sure to account for pagination and only return 5 rows at a time
-
-  res.status(501).json({ status: "not implemented", rows: [] });
+  if (rows.length > 0) {
+    res.status(200).json({ status: "search implemented", rows: rows });
+  } else {
+    rows = [];
+  }
 });
 
 /**
