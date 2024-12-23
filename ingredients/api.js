@@ -25,13 +25,11 @@ const pool = new Pool({
 router.get("/type", async (req, res) => {
   const { type } = req.query;
 
-  // return all ingredients of a type
   const { rows } = await pool.query(`SELECT * FROM ingredients WHERE type=$1`, [
     type,
   ]);
 
-  res.status(200).json({ status: "success", rows: rows});
-  // res.status(501).json({ status: "not implemented", rows: [] });
+  res.json({ rows: rows});
 });
 
 router.get("/search", async (req, res) => {
@@ -45,7 +43,7 @@ router.get("/search", async (req, res) => {
   const params = [page * 5];
 
   if (term) {
-    whereClause = `WHERE CONCAT(title, type) ILINK $2`;
+    whereClause = `WHERE CONCAT(title, type) ILIKE $2`;
     params.push(`%${term}%`);
   }
 
@@ -60,7 +58,7 @@ router.get("/search", async (req, res) => {
   // return all columns as well as the count of all rows as total_count
   // make sure to account for pagination and only return 5 rows at a time
   if (rows.length > 0) {
-    res.status(200).json({ status: "search implemented", rows: rows });
+    res.json({ rows: rows });
   } else {
     rows = [];
   }
