@@ -41,7 +41,7 @@ router.get("/search", async function (req, res) {
     ON (r.recipe_id) 
       r.recipe_id AS recipe_id,  
       r.title AS title, 
-      rp.url AS url
+      COALESCE(rp.url, 'default.jpg') AS url
     FROM 
       recipes r 
     LEFT JOIN 
@@ -57,22 +57,47 @@ router.get("/get", async (req, res) => {
   const recipeId = req.query.id ? +req.query.id : 1;
   console.log("recipe get", recipeId);
 
-  // return all ingredient rows as ingredients
-  //    name the ingredient image `ingredient_image`
-  //    name the ingredient type `ingredient_type`
-  //    name the ingredient title `ingredient_title`
-  //
-  //
-  // return all photo rows as photos
-  //    return url (named the same)
-  //
-  //
-  // return the title as title
-  // return the body as body
-  // if no row[0] has no photo, return it as default.jpg
+  const ingredientsPromise = await pool.query(`
+      SELECT
+        i.image AS ingredient_image,
+        i.type AS ingredient_type,
+        i.title AS ingredient_title
+      FROM
+        recipe_ingredients ri
+      INNER JOIN
+        ingredients i
+      ON
+        i.id = ri.ingredient_id
+      WHERE
+        ri.recipe_id = $1;
+    `, [recipeId]);
 
-  // return an array of ingredients, photos and titile of recipe and body
-  res.status(501).json({ status: "not implemented" });
+  const photosPromise = await pool.query(`
+      SELECT
+        r.title,
+        r.body,
+        COALESCE(rp.url, 'default.jpg') as url
+      FROM 
+        recipes r
+      LEFT JOIN
+        recipes_photos as rp
+      ON
+        rp.recipe_id = r.recipe_id
+      WHERE
+        rp.recipe_id = $1;
+    `, [recipeId]);
+
+  const [{ rows: photosRows }, { rows: ingredientsRows }] = await Promise.all([
+    photosPromise,
+    ingredientsPromise,
+  ]);
+
+  res.json({
+    ingredients: ingredientsRows,
+    photos: photosRows.map((photo) => photo.url),
+    title: photosRows[0].title,
+    body: photosRows[0].body
+  });
 });
 /**
  * Student code ends here
